@@ -4,31 +4,40 @@ import torch.optim as optim
 
 # Define the Autoencoder
 class Autoencoder(nn.Module):
-    def __init__(self):
+    def __init__(self, latent_dim=6, input_dim=24):
         super(Autoencoder, self).__init__()
         # Encoder: Reduce 50 -> 6
         self.encoder = nn.Sequential(
-            nn.Linear(50, 32),   # 50 -> 32
+            nn.Linear(input_dim, 16),   # 50 -> 32
             nn.ReLU(),
-            nn.Linear(32, 16),   # 32 -> 16
+            nn.BatchNorm1d(16),
+            nn.Linear(16, 8),   # 32 -> 16
             nn.ReLU(),
-            nn.Linear(16, 4),    # 16 -> 6
+            nn.BatchNorm1d(8),
+            nn.Linear(8, latent_dim),    # 16 -> 6
             nn.Tanh()            # Ensure smooth [-1, 1] range for knobs
         )
         # Decoder: Expand 6 -> 50
         self.decoder = nn.Sequential(
-            nn.Linear(4, 32),    # 6 -> 16
+            nn.Linear(latent_dim, 8),    # 6 -> 16
             nn.ReLU(),
-            nn.Linear(32, 32),   # 16 -> 32
+            nn.BatchNorm1d(8),
+            nn.Linear(8, 16),   # 16 -> 32
             nn.ReLU(),
-            nn.Linear(32, 50),   # 32 -> 50
-            nn.Sigmoid()         # Output range [0, 1] for parameters
+            nn.BatchNorm1d(16),
+            nn.Linear(16, input_dim),   # 32 -> 50
         )
 
     def forward(self, x):
         latent = self.encoder(x)
         reconstruction = self.decoder(latent)
         return reconstruction
+    
+    def encode(self, x):
+        return self.encoder(x)
+    
+    def decode(self, x):
+        return self.decoder(x)
 
 # Instantiate the model
 
