@@ -1,9 +1,18 @@
 import numpy as np
+import json
 
 def read_data(file_path):
     with open(file_path, 'r') as file:
         lines = file.readlines()
+        print(lines)
     data = [list(map(float, line.strip().split())) for line in lines]
+    data = np.array(data)
+
+    return data
+
+def read_json_to_numpy(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
     data = np.array(data)
 
     return data
@@ -20,7 +29,25 @@ def interpolate_data(data, num_interpolations=10):
 def augment_data(data, num_augmentations=10):
     augmented_data = []
     for _ in range(num_augmentations):
-        augmented_data.append(data + np.random.normal(0, 0.1, data.shape))
+        scale_factors = np.random.uniform(0.9, 1.1, size=data.shape[1])
+        augmented_data.append(data * scale_factors)
     augmented_data = np.array(augmented_data)
 
     return augmented_data
+
+def write_data(data, file_path):
+    with open(file_path, 'w') as file:
+        for row in data:
+            file.write(' '.join(map(str, row)) + '\n')
+
+def write_json(data, file_path):
+    with open(file_path, 'w') as file:
+        json.dump(data, file)
+
+if __name__ == '__main__':
+    data = read_json_to_numpy('dataset.json')
+
+    interpolated_data = interpolate_data(data)
+
+    augmented_data = augment_data(interpolated_data)
+    write_json(augmented_data, 'augmented_dataset.json')
