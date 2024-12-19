@@ -16,7 +16,7 @@ snapshots = torch.tensor(snapshots, dtype=torch.float32)
 dataset = TensorDataset(snapshots, snapshots)  # Autoencoder input = output
 dataloader = DataLoader(dataset, batch_size=450, shuffle=True)
 
-model = Autoencoder()
+model = Autoencoder(latent_dim=4, input_dim=13)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.MSELoss()
 

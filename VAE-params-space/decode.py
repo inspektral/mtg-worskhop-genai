@@ -8,17 +8,17 @@ from model import Autoencoder
 import preprocess
 
 # load model from file
-model = Autoencoder()
-model.load_state_dict(torch.load("autoencoder.pth"))
+model = Autoencoder(latent_dim=4, input_dim=13)
+model.load_state_dict(torch.load("percussion-13-4.pth"))
 model.eval()
 
-latent_space_data = torch.tensor([[0.3, -0.2, 0.3, -0.4]], dtype=torch.float32)
+latent_space_data = torch.tensor([[0.2, -0.2, 0.3, -0.4]], dtype=torch.float32)
 prediction = model.decode(latent_space_data)
 
 # denormalization
 prediction = prediction.detach().numpy()
 prediction = np.clip(prediction, 0, 1)
-prediction = preprocess.denormalize(prediction, preprocess.read_json_to_numpy('dataset.json'))
+prediction = preprocess.denormalize(prediction, preprocess.read_json_to_numpy('dataset-percussion2.json'))
 
 print(prediction)
 
@@ -28,3 +28,6 @@ def save_to_txt(data, file):
             f.write(' '.join(f'{value:.2f}' for value in row) + '\n')
 
 save_to_txt(prediction, 'decoded_snapshot.txt')
+
+scripted_decoder = torch.jit.script(model.decoder)
+scripted_decoder.save("decoder.ts")

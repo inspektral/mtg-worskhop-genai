@@ -2,30 +2,34 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-# Define the Autoencoder
 class Autoencoder(nn.Module):
+
     def __init__(self, latent_dim=6, input_dim=24):
+
+        self.latent_dim = latent_dim
+        self.input_dim = input_dim
+        
         super(Autoencoder, self).__init__()
-        # Encoder: Reduce 50 -> 6
+        
         self.encoder = nn.Sequential(
-            nn.Linear(input_dim, 16),   # 50 -> 32
+            nn.Linear(input_dim, 16),  
             nn.ReLU(),
             nn.BatchNorm1d(16),
-            nn.Linear(16, 8),   # 32 -> 16
+            nn.Linear(16, 8), 
             nn.ReLU(),
             nn.BatchNorm1d(8),
-            nn.Linear(8, latent_dim),    # 16 -> 6
-            nn.Tanh()            # Ensure smooth [-1, 1] range for knobs
+            nn.Linear(8, latent_dim),    
+            nn.Tanh()            
         )
-        # Decoder: Expand 6 -> 50
+
         self.decoder = nn.Sequential(
-            nn.Linear(latent_dim, 8),    # 6 -> 16
+            nn.Linear(latent_dim, 8), 
             nn.ReLU(),
             nn.BatchNorm1d(8),
-            nn.Linear(8, 16),   # 16 -> 32
+            nn.Linear(8, 16),
             nn.ReLU(),
             nn.BatchNorm1d(16),
-            nn.Linear(16, input_dim),   # 32 -> 50
+            nn.Linear(16, input_dim), 
         )
 
     def forward(self, x):
@@ -39,5 +43,10 @@ class Autoencoder(nn.Module):
     def decode(self, x):
         return self.decoder(x)
 
-# Instantiate the model
+    def export_onnx_encoder(self, filename):
+        dummy_input = torch.randn(1, self.input_dim)
+        torch.onnx.export(self.encoder, dummy_input, filename, verbose=True)
 
+    def export_onnx_decoder(self, filename):
+        dummy_input = torch.randn(1, self.latent_dim)
+        torch.onnx.export(self.decoder, dummy_input, filename, verbose=True)
