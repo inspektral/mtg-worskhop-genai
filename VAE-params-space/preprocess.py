@@ -18,6 +18,9 @@ def denormalize(normalized_data, original_data):
     data = normalized_data * original_data.max(axis=0)
     return data
 
+def get_denormalization_params(data):
+    return data.max(axis=0)
+
 def read_json_to_numpy(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
