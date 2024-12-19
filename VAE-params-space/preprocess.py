@@ -59,7 +59,7 @@ def write_json(data, file_path):
         json.dump(data.tolist(), file)
 
 if __name__ == '__main__':
-    data = read_json_to_numpy('dataset-percussion2.json')
+    data = read_json_to_numpy('dataset-percussion.json')
     print(data.max(axis=0))
 
     norm_data = vertical_normalize(data)
@@ -68,4 +68,4 @@ if __name__ == '__main__':
     interpolated_data = interpolate_data(norm_data)
 
     augmented_data = augment_data(interpolated_data)
-    write_json(augmented_data, 'augmented_dataset.json')
+    write_json(augmented_data, 'augmented_dataset_percussion.json')
