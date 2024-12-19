@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # Set up the server
     ip = "127.0.0.1"
-    port = 5005
+    port = 5000
     server = osc_server.ThreadingOSCUDPServer((ip, port), disp)
     print(f"Serving on {server.server_address}")
 
