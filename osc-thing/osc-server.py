@@ -1,21 +1,18 @@
-from pythonosc import dispatcher
-from pythonosc import osc_server
-from pythonosc import udp_client
+import socket
 
-def handle_message(address, *args):
-    print(f"Received message at {address} with arguments {args}")
-    return "Hello, World!"
+# Define the server address and port
+server_address = ('localhost', 5001)
 
-if __name__ == "__main__":
-    # Create a dispatcher to handle incoming messages
-    disp = dispatcher.Dispatcher()
-    disp.map("/*", handle_message)  # Use wildcard to match any address
+# Create a UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    # Set up the server
-    ip = "127.0.0.1"
-    port = 5000
-    server = osc_server.ThreadingOSCUDPServer((ip, port), disp)
-    print(f"Serving on {server.server_address}")
+# Bind the socket to the address and port
+sock.bind(server_address)
 
-    # Run the server
-    server.serve_forever()
+print(f"Server listening on {server_address[0]}:{server_address[1]}")
+
+while True:
+    # Receive data from the client
+    data, client_address = sock.recvfrom(4096)
+    if data:
+        print(f"Received from {client_address}: {data.decode('utf-8')}")
