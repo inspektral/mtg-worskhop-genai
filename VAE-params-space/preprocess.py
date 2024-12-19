@@ -18,6 +18,10 @@ def denormalize(normalized_data, original_data):
     data = normalized_data * original_data.max(axis=0)
     return data
 
+def denormalize_with_params(data, denormalization_params):
+    data = data * denormalization_params
+    return data
+
 def get_denormalization_params(data):
     return data.max(axis=0)
 

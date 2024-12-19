@@ -21,8 +21,8 @@ models = [
     {
         "name": "percussion1",
         "input_dim": 16,
-        "latent_dim": 6,
-        "model_file": "percussion-16-6.pth",
+        "latent_dim": 4,
+        "model_file": "percussion-16-4.pth",
         "dataset_file": "dataset-percussion.json"
     },
     {
@@ -39,6 +39,10 @@ for model in models:
     dataset = preprocess.read_json_to_numpy(model["dataset_file"])
     model["denormalization_params"] = preprocess.get_denormalization_params(dataset)
 
+# print denormalization parameters
+for model in models:
+    print(model["name"], model["denormalization_params"])
+
 # load models from files
 autoencoders = []
 for model in models:
@@ -53,7 +57,8 @@ def decode(model, latent_space_data, denormalization_params):
     # denormalization
     prediction = prediction.detach().numpy()
     prediction = np.clip(prediction, 0, 1)
-    prediction = preprocess.denormalize(prediction, denormalization_params)
+    prediction = preprocess.denormalize_with_params(prediction, denormalization_params)
+    print(prediction)
     
     return prediction
 
@@ -91,16 +96,26 @@ while True:
         data = data.decode('utf-8')
         print(f"Received from {client_address}: {data}")
         data = data.split(" ")
-        index = midi_maps.index(int(data[0]))
-        index_model = math.floor(index/4)
+        
+        try:
+            index = midi_maps.index(int(data[0]))
 
-        value = midi_rescale(float(data[1]))
+            index_model = math.floor(index/4)
 
-        latent_space_data[index_model][0][index%4] = value
-        print(latent_space_data[index_model])
+            value = midi_rescale(float(data[1].split(";")[0]))
 
-        prediction = decode(autoencoders[index_model], latent_space_data[index_model], models[index_model]["denormalization_params"])
-        print(prediction[0].tolist())
+            latent_space_data[index_model][0][index%4] = value
+            print("latent space", latent_space_data[index_model])
 
-        client.send_message(f"/{index_model}", prediction[0].tolist())
+            prediction = decode(autoencoders[index_model], latent_space_data[index_model], models[index_model]["denormalization_params"])
+            
+            prediction = prediction[0].tolist()
+            print(prediction)
+
+            client.send_message(f"/v{index_model}", prediction)
+        except:
+            pass
+
+
+
 
